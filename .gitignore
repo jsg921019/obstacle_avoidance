@@ -1,0 +1,32 @@
+build/
+devel/
+.vscode/
+
+*.*.save
+
+# QtCreator files
+*.*.user
+*.*.autosave
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+#temporary files
+*~
+
+# vi stuff
+.*.sw?
+
+# Python stuff
+*.pyc

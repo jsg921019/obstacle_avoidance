@@ -1,0 +1,1 @@
+object_msgs/Polygon[] polygon_list

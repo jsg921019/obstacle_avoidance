@@ -1,0 +1,4 @@
+<launch>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rviz_display)/test.rviz" required="true" />
+    <node name="draw" pkg="rviz_display" type="draw_path.py" output="screen" />
+</launch>
