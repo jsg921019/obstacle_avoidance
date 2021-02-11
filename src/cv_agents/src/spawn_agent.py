@@ -17,6 +17,7 @@ from control.pid import PID_Controller
 from control.stanley import Stanley
 from pathfinding.frenet import Frenet
 from rviz_display.draw_path import PathDrawer, PointDrawer
+from rviz_display.odom import Odom
 
 def get_ros_msg(x, y, yaw, v, car_id):
     quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
@@ -56,7 +57,6 @@ def get_ros_msg(x, y, yaw, v, car_id):
     return {
         "object_msg": o,
         "marker_msg": m,
-        "quaternion": quat
     }
 
 rospy.init_node("car")
@@ -90,6 +90,7 @@ marker_pub = rospy.Publisher("/objects/marker/car_" + str(car_id), Marker, queue
 object_pub = rospy.Publisher("/objects/car_" + str(car_id), Object, queue_size=1)
 path_drawer = PathDrawer()
 point_drawer = PointDrawer()
+odometry = Odom(name="odom", child_frame_id="car_" + str(car_id), frame_id="map")
 
 
 
@@ -120,7 +121,7 @@ while not rospy.is_shutdown():
 
     # publish current state
     msg = get_ros_msg(state.x, state.y, state.yaw, state.v, car_id=car_id)
-    tf_broadcaster.sendTransform((state.x, state.y, 1.5), msg["quaternion"], rospy.Time.now(), "car_" + str(car_id), "map")
+    odometry.publish(state.x, state.y, 0, state.yaw)
     object_pub.publish(msg["object_msg"])
 
     rate.sleep()

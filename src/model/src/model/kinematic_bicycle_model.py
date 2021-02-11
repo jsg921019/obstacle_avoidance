@@ -38,16 +38,19 @@ class State:
         # self.rear_y = self.y - ((WB / 2) * np.sin(self.yaw))
         self.dt = dt
         self.L = L
+        self.w = 0
 
     def update(self, a, delta):
         dt = self.dt
 
         self.x += self.v * np.cos(self.yaw) * dt
         self.y += self.v * np.sin(self.yaw) * dt
-        self.yaw += self.v / self.L * np.tan(delta) * dt
+        self.a = a
+        self.w = self.v / self.L * np.tan(delta)
+        self.yaw += self.w * dt
         self.yaw = pi_2_pi(self.yaw)
         self.v += a * dt
-        self.a = a
+
         # self.rear_x = self.x - ((WB / 2) * np.cos(self.yaw))
         # self.rear_y = self.y - ((WB / 2) * np.sin(self.yaw))
         # self.drawer.draw(self.x, self.y, 2, self.rear_x, self.rear_y, 2)
