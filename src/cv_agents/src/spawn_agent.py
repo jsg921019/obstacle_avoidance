@@ -98,7 +98,7 @@ point_drawer = PointDrawer()
 state = State(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1, dt=0.1)
 longitudinal_controller = PID_Controller(3.5, 0, 0.00001)
 lateral_controller = Stanley(0.8, 0.5, 0, 2.875)
-path_finder = Frenet(ref_path)
+path_finder = Frenet(ref_path, ref_path["x"][start_ind], ref_path["y"][start_ind], ref_path["yaw"][start_ind])
 
 
 ######## Main ########
@@ -106,7 +106,7 @@ rate = rospy.Rate(10)
 while not rospy.is_shutdown():
     point_drawer.draw(22.578, -8.273, 3)
     # find optimal path from Frenet
-    paths, optimal_path = path_finder.find_path(state.x + state.L * np.cos(state.yaw), state.y + state.L * np.sin(state.yaw), state.v, state.a, state.yaw, obstacles)
+    paths, optimal_path = path_finder.find_path(state.x + state.L * np.cos(state.yaw), state.y + state.L * np.sin(state.yaw), obstacles)
     if optimal_path:
         path_drawer.draw(optimal_path.x, optimal_path.y)
 
