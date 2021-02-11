@@ -7,73 +7,28 @@ import math
 import numpy as np
 from scipy.spatial import KDTree
 from matplotlib import *
-from rviz_display.draw_path import PointDrawer
 
-def next_waypoint(x, y, mapx, mapy):
-    closest_wp = get_closest_waypoints(x, y, mapx, mapy)
+def get_dist(x1, y1, x2, y2):
+    return math.hypot(x1 - x2 ,y1 - y2)
 
-    map_vec = [mapx[closest_wp + 1] - mapx[closest_wp], mapy[closest_wp + 1] - mapy[closest_wp]]
-    ego_vec = [x - mapx[closest_wp], y - mapy[closest_wp]]
+def get_frenet(x, y, mapx, mapy, maps):
 
-    direction  = np.sign(np.dot(map_vec, ego_vec))
-
-    if direction >= 0:
-        next_wp = closest_wp + 1
-    else:
-        next_wp = closest_wp
-
-    return next_wp
-
-
-def get_closest_waypoints(x, y, mapx, mapy):
-    min_len = 1e10
-    closest_wp = 0
-
-    for i in range(len(mapx)):
-        _mapx = mapx[i]
-        _mapy = mapy[i]
-        dist = get_dist(x, y, _mapx, _mapy)
-
-        if dist < min_len:
-            min_len = dist
-            closest_wp = i
-
-    return closest_wp
-
-def get_dist(x, y, _x, _y):
-    return np.sqrt((x - _x)**2 + (y - _y)**2)
-
-def get_frenet(x, y, mapx, mapy):
-    next_wp = next_waypoint(x, y, mapx, mapy)
+    idx = np.argmin(np.hypot(x - mapx, y - mapy))
+    map_vec = [mapx[idx + 1] - mapx[idx], mapy[idx + 1] - mapy[idx]]
+    ego_vec = [x - mapx[idx], y - mapy[idx]]
+    next_wp = idx+1 if np.dot(map_vec, ego_vec) >=0 else idx
     prev_wp = next_wp -1
 
     n_x = mapx[next_wp] - mapx[prev_wp]
     n_y = mapy[next_wp] - mapy[prev_wp]
-    x_x = x - mapx[prev_wp]
-    x_y = y - mapy[prev_wp]
+    ego_vec = [x-mapx[prev_wp], y-mapy[prev_wp]]
+    map_vec = [n_x, n_y]
 
-    proj_norm = (x_x*n_x+x_y*n_y)/(n_x*n_x+n_y*n_y)
-    proj_x = proj_norm*n_x
-    proj_y = proj_norm*n_y
+    d= np.cross(map_vec, ego_vec)/(maps[next_wp] - maps[prev_wp])
+    s = maps[prev_wp] + np.dot(map_vec, ego_vec)/(maps[next_wp] - maps[prev_wp])
+    heading = np.arctan2(n_y, n_x)
 
-    heading = np.arctan2(n_y, n_x) # [rad]
-    #-------- get frenet d
-    frenet_d = get_dist(x_x,x_y,proj_x,proj_y)
-
-    ego_vec = [x-mapx[prev_wp], y-mapy[prev_wp], 0]
-    map_vec = [n_x, n_y, 0]
-    d_cross = np.cross(ego_vec,map_vec)
-    if d_cross[-1] > 0:
-        frenet_d = -frenet_d
-
-    #-------- get frenet s
-    frenet_s = 0;
-    for i in range(prev_wp):
-        frenet_s = frenet_s + get_dist(mapx[i],mapy[i],mapx[i+1],mapy[i+1]);
-
-    frenet_s = frenet_s + get_dist(0,0,proj_x,proj_y);
-
-    return frenet_s, frenet_d, heading
+    return s, d, heading
 
 # def get_frenet(x, y, refs, dist_lookup):
 #     curr = np.array([x,y])
@@ -117,28 +72,16 @@ def get_frenet(x, y, mapx, mapy):
 
 #     return frenet_s, frenet_d, heading
 
-def get_cartesian(s, d, mapx, mapy, maps):
-    prev_wp = 0
-    s = np.mod(s, maps[-2])
-    while(s > maps[prev_wp+1]) and (prev_wp < len(maps)-2):
-        prev_wp = prev_wp + 1
+def get_cartesian(s, d, mapx, mapy, maps, mapyaw):
 
-    next_wp = np.mod(prev_wp+1,len(mapx))
+    prev_wp = np.searchsorted(maps, s, 'left') -1
 
-    dx = (mapx[next_wp]-mapx[prev_wp])
-    dy = (mapy[next_wp]-mapy[prev_wp])
+    heading = mapyaw[prev_wp]
+    perp_heading = heading + np.deg2rad(90)
 
-    heading = np.arctan2(dy, dx) # [rad]
-
-    # the x,y,s along the segment
     seg_s = s - maps[prev_wp]
-
-    seg_x = mapx[prev_wp] + seg_s*np.cos(heading)
-    seg_y = mapy[prev_wp] + seg_s*np.sin(heading)
-
-    perp_heading = heading + 90 * np.pi/180
-    x = seg_x + d*np.cos(perp_heading)
-    y = seg_y + d*np.sin(perp_heading)
+    x = mapx[prev_wp] + seg_s*np.cos(heading) + d*np.cos(perp_heading)
+    y = mapy[prev_wp] + seg_s*np.sin(heading) + d*np.sin(perp_heading)
 
     return x, y, heading
 
@@ -328,8 +271,8 @@ class Frenet(object):
         return frenet_paths
 
     def find_path(self, x, y, v, a, yaw, obstacles):
-        s, d, yaw_road = get_frenet(x, y, self.refd["x"], self.refd["y"])
-        x, y, heading = get_cartesian(s, d, self.refd["x"], self.refd["y"], self.refd["s"])
+        s, d, yaw_road = get_frenet(x, y, self.refd["x"], self.refd["y"], self.refd["s"])
+        x, y, heading = get_cartesian(s, d, self.refd["x"], self.refd["y"], self.refd["s"], self.refd["yaw"])
         #self.drawer.draw(x, y, 2)
         yawi = 0 # yaw - yaw_road
         # s 방향 초기조건
@@ -369,7 +312,7 @@ class Frenet(object):
             for i in range(len(fp.s)):
                 _s = fp.s[i]
                 _d = fp.d[i]
-                _x, _y, _ = get_cartesian(_s, _d, self.refd["x"], self.refd["y"], self.refd["s"])
+                _x, _y, _ = get_cartesian(_s, _d, self.refd["x"], self.refd["y"], self.refd["s"], self.refd["yaw"])
                 fp.x.append(_x)
                 fp.y.append(_y)
 
