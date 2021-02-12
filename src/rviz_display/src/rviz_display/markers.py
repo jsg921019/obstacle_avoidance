@@ -2,54 +2,46 @@
 
 import rospy
 import numpy as np
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
 from std_msgs.msg import Header, ColorRGBA
 
-class CreateMarker(object):
-    def __init__(self, frame_id, ns, id, type, lifetime=None, point=(0,0,0), quat=(0,0,0,1), scale=(1,1,1), color=(1,0,0,1)):
-        self.params = {"frame_id":frame_id, "ns":ns, "id":id, "type":type, "lifetime":lifetime,
-                       "point":point, "quat":quat, "scale":scale, "color":color}
 
-    def set_param(self, **kargs):
-        for karg in kargs:
-            if karg in self.params:
-                self.params[karg] = kargs[karg]
-            else:
-                raise KeyError("wrong parameter %s" %karg)
-
-    def create(self):
-
-        if self.params["type"] == 1:
-            m = Marker()
-            m.header.frame_id = self.params["frame_id"]
-            m.header.stamp = rospy.Time.now()
-            m.ns = self.params["ns"]
-            m.id = self.params["id"]
-            m.type = self.params["type"]
-            m.pose = Pose(Point(*self.params["point"]), Quaternion(*self.params["quat"]))
-            m.scale = Vector3(*self.params["scale"])
-            m.color = ColorRGBA(*self.params["color"])  
-
-        return m
-
-class PathDrawer:
+class PathMarker:
     def __init__(self, frame_id="/map"):
-        self.pub = rospy.Publisher("path", Marker, queue_size=1) 
-        self.frame_id = frame_id
-    def draw(self, x, y):
+        self.frame_id=frame_id
+    def convert(self, path):
         marker = Marker(
                     ns = "path",
                     type=Marker.LINE_STRIP,
                     id=1,
                     lifetime = rospy.Duration(1.5),
-                    scale=Vector3(0.4, 0, 0),
+                    scale=Vector3(0.25, 0, 0),
                     header=Header(frame_id = self.frame_id),
-                    color=ColorRGBA(1.0, 0.0, 0.0, 0.8))
-        for _x, _y in zip(x,y):
-            point = Point(_x,_y, 0)
-            marker.points.append(point)
-        self.pub.publish(marker)
+                    color=ColorRGBA(0.0, 1.0, 1.0, 0.8))
+        marker.points = [Point(_x,_y, 0.1) for _x, _y in zip(path.x, path.y)]
+        return marker
+
+class PathsMarkerArray:
+    def __init__(self, frame_id="/map"):
+        #self.pub = rospy.Publisher("paths", MarkerArray, queue_size=1) 
+        self.frame_id = frame_id
+
+    def convert(self, paths):
+        ma = []
+        for i, path in enumerate(paths):
+            m= Marker(
+                ns = "paths",
+                type=Marker.LINE_STRIP,
+                id = i,
+                lifetime = rospy.Duration(1.5),
+                scale=Vector3(0.15, 0, 0),
+                header=Header(frame_id = self.frame_id),
+                color=ColorRGBA(0, 0.6, 0.5, 0.7))
+            m.points = [Point(_x,_y, 0) for _x, _y in zip(path.x, path.y)]
+            ma.append(m)
+
+        return ma
 
 class PointDrawer:
     def __init__(self, frame_id="/map"):
@@ -66,7 +58,8 @@ class PointDrawer:
                     scale=Vector3(1, 1, 1),
                     header=Header(frame_id=self.frame_id),
                     color=ColorRGBA(0.0, 1.0, 0.0, 0.8))
-        self.pub.publish(marker)
+        #self.pub.publish(marker)
+        return marker
 
 class ArrowDrawer:
     def __init__(self,  frame_id="/map"):
@@ -84,3 +77,19 @@ class ArrowDrawer:
                     header=Header(frame_id=self.frame_id),
                     color=ColorRGBA(0.0, 1.0, 0.0, 0.8))
         self.pub.publish(marker)
+
+class TextMarker:
+    def __init__(self):
+        pass
+
+    def convert(self, text, size, id=0, color=(1.0, 1.0, 1.0, 1.0)):
+        marker = Marker(
+            ns = "ui",
+            type=Marker.TEXT_VIEW_FACING,
+            id=id,
+            text = text,
+            pose = Pose(Point(35, 10, 0), Quaternion(0, 0, 0, 1)),
+            scale=Vector3(1, 1, size),
+            header=Header(frame_id="map"),
+            color=ColorRGBA(*color))
+        return marker

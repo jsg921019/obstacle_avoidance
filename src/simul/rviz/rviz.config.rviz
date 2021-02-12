@@ -4,8 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Cars1
         - /Cars1/Namespaces1
+        - /Path History1/Shape1
       Splitter Ratio: 0.5
     Tree Height: 650
   - Class: rviz/Selection
@@ -114,7 +114,7 @@ Visualization Manager:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.100000001
-        Color: 179; 255; 201
+        Color: 255; 71; 71
         Head Length: 1
         Head Radius: 0.699999988
         Shaft Length: 1
@@ -123,13 +123,15 @@ Visualization Manager:
       Topic: /odom
       Unreliable: false
       Value: true
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /path
-      Name: Optimal Frenet Path
+      Marker Topic: /paths
+      Name: Path Planning
       Namespaces:
         path: true
-      Queue Size: 1
+        paths: true
+        ui: true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -156,16 +158,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 92.8306427
+      Distance: 137.548828
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 10.0871325
-        Y: 11.9711609
-        Z: -2.34577894
+        X: 9.04358292
+        Y: 10.2623787
+        Z: -7.09349728
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
@@ -174,7 +176,7 @@ Visualization Manager:
       Pitch: 1.56979632
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.25820255
+      Yaw: 4.19324064
     Saved: ~
 Window Geometry:
   Displays:

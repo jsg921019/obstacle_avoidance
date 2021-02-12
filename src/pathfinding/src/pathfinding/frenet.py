@@ -40,9 +40,9 @@ class Frenet(object):
         s, d, yaw_road = self.get_frenet(x, y)
         self.prev_opt_path = FrenetPath(s, d, np.tan(yaw-yaw_road), 0, s+1, 0, 0, 0)
 
-        self.MIN_SF = 10.0
+        self.MIN_SF = 8.0
         self.MAX_SF = 20.0
-        self.DS = 2.0
+        self.DS = 4.0
         self.steps = 20
 
         self.K_MAX = 5.0
