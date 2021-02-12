@@ -12,7 +12,7 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object
 
-from model.kinematic_bicycle_model import State
+from model.vehicle import KinematicBicycle
 from control.pid import PID_Controller
 from control.stanley import Stanley
 from pathfinding.frenet import Frenet
@@ -96,7 +96,7 @@ odometry = Odom(name="odom", child_frame_id="car_" + str(car_id), frame_id="map"
 
 ######## Instances ########
 
-state = State(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1, dt=0.1)
+state = KinematicBicycle(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1)
 longitudinal_controller = PID_Controller(3.5, 0, 0.00001)
 lateral_controller = Stanley(0.8, 0.5, 0, 2.875)
 path_finder = Frenet(ref_path, ref_path["x"][start_ind], ref_path["y"][start_ind], ref_path["yaw"][start_ind])
@@ -105,7 +105,6 @@ path_finder = Frenet(ref_path, ref_path["x"][start_ind], ref_path["y"][start_ind
 ######## Main ########
 rate = rospy.Rate(10)
 while not rospy.is_shutdown():
-    point_drawer.draw(22.578, -8.273, 3)
     # find optimal path from Frenet
     paths, optimal_path = path_finder.find_path(state.x + state.L * np.cos(state.yaw), state.y + state.L * np.sin(state.yaw), obstacles)
     if optimal_path:
@@ -123,5 +122,4 @@ while not rospy.is_shutdown():
     msg = get_ros_msg(state.x, state.y, state.yaw, state.v, car_id=car_id)
     odometry.publish(state.x, state.y, 0, state.yaw)
     object_pub.publish(msg["object_msg"])
-
     rate.sleep()

@@ -1,7 +1,7 @@
 #! /usr/bin python
+#-*- coding: utf-8 -*-
 
 import numpy as np
-from model.kinematic_bicycle_model import KinematicBicycle
 
 class Stanley(object):
     def __init__(self, k, ks=0.0, kd=0.0, L=2.875):
@@ -59,7 +59,7 @@ class Stanley(object):
 
 
 if __name__ == "__main__":
-
+    from model.vehicle import KinematicBicycle
     import matplotlib.pyplot as plt
 
     # paramters
