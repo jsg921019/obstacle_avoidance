@@ -113,7 +113,7 @@ Visualization Manager:
       Marker Topic: /point
       Name: Marker
       Namespaces:
-        obstacles: true
+        {}
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -191,25 +191,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 196.824295
+      Distance: 95.2130127
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 10.9657774
-        Y: -3.76393938
-        Z: -2.36468577
+        X: 21.6378307
+        Y: 9.130476
+        Z: -2.34825921
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.26479661
+      Pitch: 1.56979632
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.22820473
+      Yaw: 4.21320486
     Saved: ~
 Window Geometry:
   Displays:
