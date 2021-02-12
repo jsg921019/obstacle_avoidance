@@ -4,13 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
-        - /Marker1/Namespaces1
-        - /Path History1/Shape1
-        - /Path History1/Covariance1
-        - /Marker4
-        - /Marker4/Namespaces1
+        - /Cars1
+        - /Cars1/Namespaces1
       Splitter Ratio: 0.5
     Tree Height: 650
   - Class: rviz/Selection
@@ -55,46 +50,6 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: false
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/lane_links
-      Name: Route
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/lane_markings
-      Name: Surface
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /objects/marker/car_1
-      Name: EgoCar
-      Namespaces:
-        {}
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /objects/marker/car_3
-      Name: ParkedCar2
-      Namespaces:
-        {}
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /objects/marker/car_2
-      Name: ParkedCar3
-      Namespaces:
-        {}
-      Queue Size: 1
-      Value: true
     - Class: rviz/TF
       Enabled: false
       Frame Timeout: 15
@@ -109,29 +64,30 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /point
-      Name: Marker
+      Marker Topic: /rviz/lane_links
+      Name: Route
       Namespaces:
-        {}
+        "": true
       Queue Size: 1
       Value: true
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /path
-      Name: Marker
+      Marker Topic: /rviz/lane_markings
+      Name: Surface
       Namespaces:
-        path: true
+        "": true
       Queue Size: 1
       Value: true
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /arrow
-      Name: Marker
+      Marker Topic: /cars
+      Name: Cars
       Namespaces:
-        {}
-      Queue Size: 100
+        driving: true
+        parked: true
+      Queue Size: 1
       Value: true
     - Angle Tolerance: 3
       Class: rviz/Odometry
@@ -169,11 +125,11 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /markers
-      Name: Marker
+      Marker Topic: /path
+      Name: Optimal Frenet Path
       Namespaces:
-        car: true
-      Queue Size: 100
+        path: true
+      Queue Size: 1
       Value: true
   Enabled: true
   Global Options:
@@ -200,7 +156,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 133.044678
+      Distance: 92.8306427
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -218,7 +174,7 @@ Visualization Manager:
       Pitch: 1.56979632
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.18819714
+      Yaw: 4.25820255
     Saved: ~
 Window Geometry:
   Displays:

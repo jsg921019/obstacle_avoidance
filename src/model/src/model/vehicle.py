@@ -45,7 +45,7 @@ class Vehicle(object):
     def publish_marker(self):
         quat = tf.transformations.quaternion_from_euler(0, 0, self.yaw)
         self.m.header.stamp = rospy.Time.now()
-        self.m.pose = Pose(Point(self.x, self.y, self.specs["HEIGHT"]/2.0), Quaternion(*quat))
+        self.m.pose = Pose(Point(self.x + self.L * math.cos(self.yaw), self.y + self.L * math.sin(self.yaw), self.specs["HEIGHT"]/2.0), Quaternion(*quat))
         self.marker_pub.publish(self.m)
 
 class KinematicBicycle(Vehicle):

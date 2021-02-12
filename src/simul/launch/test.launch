@@ -7,5 +7,5 @@
     </node>
 
     <node name="parked_cars" pkg= "simul" type="parking_car.py"/>
-    <!--<node name="collision_check" pkg= "obstacles" type="collision_check_with_visualizing_car.py" />-->
+    <node name="collision_check" pkg= "obstacles" type="collision_check_with_visualizing_car.py" />
 </launch>

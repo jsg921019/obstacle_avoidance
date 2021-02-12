@@ -47,7 +47,7 @@ class Frenet(object):
 
         self.K_MAX = 5.0
 
-        self.LANE_WIDTH = 3.2
+        self.LANE_WIDTH = 3.0
 
         # cost weights
         self.K_J = 0.1 # weight for jerk
