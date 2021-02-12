@@ -17,7 +17,6 @@ from control.pid import PID_Controller
 from control.stanley import Stanley
 from pathfinding.frenet import Frenet
 from rviz_display.draw_path import PathDrawer, PointDrawer
-from rviz_display.odom import Odom
 
 def get_ros_msg(x, y, yaw, v, car_id):
     quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
@@ -55,6 +54,7 @@ def get_ros_msg(x, y, yaw, v, car_id):
     o.W = m.scale.y
 
     return {
+        "quat": quat,
         "object_msg": o,
         "marker_msg": m,
     }
@@ -84,42 +84,42 @@ with open(path + "/src/ref_path.pkl", "rb") as f:
 
 ######## Publishers ########
 
-
-tf_broadcaster = tf.TransformBroadcaster()
-marker_pub = rospy.Publisher("/objects/marker/car_" + str(car_id), Marker, queue_size=1)
-object_pub = rospy.Publisher("/objects/car_" + str(car_id), Object, queue_size=1)
 path_drawer = PathDrawer()
-point_drawer = PointDrawer()
-odometry = Odom(name="odom", child_frame_id="car_" + str(car_id), frame_id="map")
+#point_drawer = PointDrawer()
 
 
 
 ######## Instances ########
 
-state = KinematicBicycle(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1)
+car = KinematicBicycle(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1)
+car.init_marker_pub(topic="markers", frame_id="map", ns="car", id=car_id)
+car.init_odom_pub(name="odom", child_frame_id="car", frame_id="map")
+
 longitudinal_controller = PID_Controller(3.5, 0, 0.00001)
 lateral_controller = Stanley(0.8, 0.5, 0, 2.875)
+
 path_finder = Frenet(ref_path, ref_path["x"][start_ind], ref_path["y"][start_ind], ref_path["yaw"][start_ind])
+
 
 
 ######## Main ########
 rate = rospy.Rate(10)
 while not rospy.is_shutdown():
+    
     # find optimal path from Frenet
-    paths, optimal_path = path_finder.find_path(state.x + state.L * np.cos(state.yaw), state.y + state.L * np.sin(state.yaw), obstacles)
+    paths, optimal_path = path_finder.find_path(car.x + car.L * np.cos(car.yaw), car.y + car.L * np.sin(car.yaw), obstacles)
     if optimal_path:
         path_drawer.draw(optimal_path.x, optimal_path.y)
 
-    # update state
-    ai = longitudinal_controller.feedback(state.v - target_speed, 0.1)
+    # update car
+    ai = longitudinal_controller.feedback(car.v - target_speed, 0.1)
     if optimal_path:
-        di = lateral_controller.feedback(state.x, state.y, state.yaw, state.v, optimal_path.x, optimal_path.y, optimal_path.yaw)
+        di = lateral_controller.feedback(car.x, car.y, car.yaw, car.v, optimal_path.x, optimal_path.y, optimal_path.yaw)
     else:
-        di = lateral_controller.feedback(state.x, state.y, state.yaw, state.v, ref_path["x"], ref_path["y"], ref_path["yaw"])
-    state.update(ai, di)
+        di = lateral_controller.feedback(car.x, car.y, car.yaw, car.v, ref_path["x"], ref_path["y"], ref_path["yaw"])
+    car.update(ai, di)
 
-    # publish current state
-    msg = get_ros_msg(state.x, state.y, state.yaw, state.v, car_id=car_id)
-    odometry.publish(state.x, state.y, 0, state.yaw)
-    object_pub.publish(msg["object_msg"])
+    # publish car
+    car.publish_marker()
+    car.publish_odom()
     rate.sleep()

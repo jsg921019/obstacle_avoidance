@@ -2,14 +2,18 @@
 #-*- coding: utf-8 -*-
 
 import rospy
-from model.vehicle import CarParked
+from model.vehicle import Vehicle
 
 rospy.init_node("parking_car")
-r = rospy.Rate(1)
-cp1 = CarParked(x=45.4, y=31.7, yaw=-0.51, id=2)
-cp2 = CarParked(x=25.578, y=-9.773, yaw=2.65, id=3)
+rate = rospy.Rate(1)
+
+cp1 = Vehicle(x=45.4, y=31.7, yaw=-0.51)
+cp1.init_marker_pub("markers", "map", "car", 2)
+
+cp2 = Vehicle(x=25.578, y=-9.773, yaw=2.65)
+cp2.init_marker_pub("markers", "map", "car", 3)
 
 while not rospy.is_shutdown():
-    cp1.to_ros()
-    cp2.to_ros()
-    r.sleep()
+    cp1.publish_marker()
+    cp2.publish_marker()
+    rate.sleep()

@@ -18,13 +18,12 @@ class Odom(object):
         self.seq = 0
 
     def publish(self, x, y, z, yaw):
-        curr_time = rospy.Time.now()
         odom_quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
         #self.odom_broadcaster.sendTransform((x, y, z), odom_quat, curr_time, "base_link", "odom")
 
         odom = Odometry()
         odom.header.seq = self.seq
-        odom.header.stamp = curr_time
+        odom.header.stamp = rospy.Time.now()
         odom.header.frame_id = self.frame_id
         odom.child_frame_id = "base_link"
         odom.pose.pose = Pose(Point(x, y, z), Quaternion(*odom_quat))

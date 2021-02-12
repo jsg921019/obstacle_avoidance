@@ -1,9 +1,11 @@
 <launch>
     <node name="map" pkg= "map_server" type="map_visualizer.py" />
     <node name="rviz" pkg= "rviz" type="rviz" args="-d $(find simul)/rviz/rviz.config.rviz" required="true" />
-    <node name="obstacles" pkg= "simul" type="parking_car.py" />
-    <node name="collision_check" pkg= "obstacles" type="collision_check_with_visualizing_car.py" />
-    <node name="car_1" pkg= "simul" type="spawn_agent.py" output="screen">
-        <param name="id" value="1" />
+
+    <node name="autonomous_car" pkg= "simul" type="spawn_agent.py" output="screen">
+        <param name="id" value="1"/>
     </node>
+
+    <node name="parked_cars" pkg= "simul" type="parking_car.py"/>
+    <!--<node name="collision_check" pkg= "obstacles" type="collision_check_with_visualizing_car.py" />-->
 </launch>

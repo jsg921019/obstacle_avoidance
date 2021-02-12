@@ -6,6 +6,33 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
 from std_msgs.msg import Header, ColorRGBA
 
+class CreateMarker(object):
+    def __init__(self, frame_id, ns, id, type, lifetime=None, point=(0,0,0), quat=(0,0,0,1), scale=(1,1,1), color=(1,0,0,1)):
+        self.params = {"frame_id":frame_id, "ns":ns, "id":id, "type":type, "lifetime":lifetime,
+                       "point":point, "quat":quat, "scale":scale, "color":color}
+
+    def set_param(self, **kargs):
+        for karg in kargs:
+            if karg in self.params:
+                self.params[karg] = kargs[karg]
+            else:
+                raise KeyError("wrong parameter %s" %karg)
+
+    def create(self):
+
+        if self.params["type"] == 1:
+            m = Marker()
+            m.header.frame_id = self.params["frame_id"]
+            m.header.stamp = rospy.Time.now()
+            m.ns = self.params["ns"]
+            m.id = self.params["id"]
+            m.type = self.params["type"]
+            m.pose = Pose(Point(*self.params["point"]), Quaternion(*self.params["quat"]))
+            m.scale = Vector3(*self.params["scale"])
+            m.color = ColorRGBA(*self.params["color"])  
+
+        return m
+
 class PathDrawer:
     def __init__(self, frame_id="/map"):
         self.pub = rospy.Publisher("path", Marker, queue_size=1) 
