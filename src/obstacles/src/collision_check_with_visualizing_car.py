@@ -3,7 +3,6 @@
 
 import rospy
 import tf
-import itertools
 
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
@@ -45,7 +44,7 @@ class collision_check_marker():
 if __name__ == "__main__":
 
     rospy.init_node("collision_checking_marker_node")
-    r = rospy.Rate(30)
+    r = rospy.Rate(20)
 
     collision_check = collision_check_marker()
     while not rospy.is_shutdown():

@@ -29,14 +29,18 @@ class FrenetPath(object):
         self.y = []
         self.ds = []
         self.yaw = []
+        
 
 class Frenet(object):
     def __init__(self, reference_path, x, y, yaw):
- 
+
         self.refx = reference_path["x"]
         self.refy = reference_path["y"]
         self.refs = reference_path["s"]
         self.refyaw = reference_path["yaw"]
+
+        self.min_idx = 0
+        self.max_idx = len(self.refx)-1
 
         s, d, yaw_road = self.get_frenet(x, y)
         self.prev_opt_path = FrenetPath(s, d, np.tan(yaw-yaw_road), 0, s+1, 0, 0, 0)
@@ -49,19 +53,18 @@ class Frenet(object):
         self.LANE_WIDTH = 3.0
 
         # cost weights
-        self.K_J = 0.1 # weight for jerk
-        self.K_T = 0.1 # weight for terminal time
-        self.K_D = 5.0 # weight for consistency
-        self.K_V = 1.0 # weight for getting to target speed
-        self.K_LAT = 3.0 # weight for lateral direction
-        self.K_LON = 1.0 # weight for longitudinal direction
+        self.K_DIFF = 1.0
+        self.K_KAPPA = 500
+        self.K_SHORT = 10.0
+        self.K_COLLISION = 0.01
 
         self.COL_CHECK = 2.0 # collision check distance [m]
-        self.DF_SET = np.array([-self.LANE_WIDTH * 1.0/2.0, 0,  self.LANE_WIDTH * 1.0/2.0])
+        self.DF_SET = np.array([-self.LANE_WIDTH * 2.0/3.0, -self.LANE_WIDTH * 1.0/2.0, 0,  self.LANE_WIDTH * 1.0/2.0, self.LANE_WIDTH * 2.0/3.0])
 
     def get_frenet(self, x, y):
-
-        idx = np.argmin(np.hypot(x - self.refx, y - self.refy))
+        
+        idx = self.min_idx + np.argmin(np.hypot(x - self.refx[self.min_idx:self.max_idx], y - self.refy[self.min_idx:self.max_idx]))
+        self.min_idx, self.max_idx = max(0,idx-10), min(len(self.refx)-1, idx+10)
         map_vec = [self.refx[idx + 1] - self.refx[idx], self.refy[idx + 1] - self.refy[idx]]
         ego_vec = [x - self.refx[idx], y - self.refy[idx]]
         next_wp = idx + 1 if np.dot(map_vec, ego_vec) >=0 else idx
@@ -95,6 +98,24 @@ class Frenet(object):
         frenet_paths = self.calc_frenet_paths(x, y)
         frenet_paths = self.calc_global_paths(frenet_paths)
         frenet_paths = self.check_path(frenet_paths, obstacles)
+
+        for fp in frenet_paths:
+
+            # cost for consistency
+            d_diff = (self.prev_opt_path.target_d - fp.target_d)**2
+
+            # cost for path length
+            path_sum = np.sum(fp.ds)
+
+            # cost for curvature
+            yaw_diff = fp.yaw[1:] - fp.yaw[:-1]
+            yaw_diff = np.arctan2(np.sin(yaw_diff), np.cos(yaw_diff))
+            yaw_diff = np.abs(yaw_diff)
+            mean_kappa = np.sum(yaw_diff / fp.ds[:-1])
+            
+            # cost
+            fp.c = self.K_DIFF * d_diff + self.K_SHORT * path_sum + self.K_KAPPA * mean_kappa + self.K_COLLISION / (fp.gap + 0.01)
+
         min_cost = float("inf")
         opt_path = None
 
@@ -121,7 +142,6 @@ class Frenet(object):
         dddf = 0.0
 
         frenet_paths = []
-
         for df in self.DF_SET:
             for sf in np.arange(si+self.MIN_SF, si+self.MAX_SF + self.DS, self.DS):
                 fp = FrenetPath(si, di, ddi, dddi, sf, df, ddf, dddf)
@@ -148,41 +168,25 @@ class Frenet(object):
             fp.yaw = np.append(fp.yaw, fp.yaw[-1])
             fp.ds = np.append(fp.ds, fp.ds[-1])
 
-            # cost for consistency
-            d_diff = (self.prev_opt_path.target_d - fp.target_d)**2
-
-            # cost for path length
-            path_sum = np.sum(fp.ds)
-
-            # cost for curvature
-            yaw_diff = fp.yaw[1:] - fp.yaw[:-1]
-            yaw_diff = np.arctan2(np.sin(yaw_diff), np.cos(yaw_diff))
-            yaw_diff = np.abs(yaw_diff)
-            mean_kappa = np.sum(yaw_diff / fp.ds[:-1])
-            
-            # cost
-            fp.c = self.K_D * d_diff + path_sum + 500*mean_kappa
-
         return fplist
 
     def check_path(self, fplist, obstacles):
         ok_ind = []
-        reason = []
         for i, _path in enumerate(fplist):
             if self.collision_check(_path, obstacles):
-                reason.append("collision")
                 continue
             ok_ind.append(i)
 
         if not ok_ind:
-            print(reason)
+            print("No Path Found")
         return [fplist[i] for i in ok_ind]
 
     def collision_check(self, fp, obstacles):
         for ox, oy in obstacles:
 
             d = [((_x - ox) ** 2 + (_y - oy) ** 2) for (_x, _y) in zip(fp.x, fp.y)]
-            collision = any([di <= self.COL_CHECK ** 2 for di in d])
+            fp.gap = min(d) - self.COL_CHECK ** 2
+            collision = fp.gap <= 0
 
             if collision:
                 return True

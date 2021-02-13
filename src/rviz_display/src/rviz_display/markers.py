@@ -16,10 +16,10 @@ class PathMarker:
                     ns = "path",
                     type=Marker.LINE_STRIP,
                     id=1,
-                    lifetime = rospy.Duration(1.5),
-                    scale=Vector3(0.25, 0, 0),
+                    lifetime = rospy.Duration(0.2),
+                    scale=Vector3(0.3, 0, 0),
                     header=Header(frame_id = self.frame_id),
-                    color=ColorRGBA(0.0, 1.0, 1.0, 0.8))
+                    color=ColorRGBA(0.0, 8.0, 1.0, 0.8))
         marker.points = [Point(_x,_y, 0.1) for _x, _y in zip(path.x, path.y)]
         return marker
 
@@ -35,7 +35,7 @@ class PathsMarkerArray:
                 ns = "paths",
                 type=Marker.LINE_STRIP,
                 id = i,
-                lifetime = rospy.Duration(1.5),
+                lifetime = rospy.Duration(0.2),
                 scale=Vector3(0.15, 0, 0),
                 header=Header(frame_id = self.frame_id),
                 color=ColorRGBA(0, 0.6, 0.5, 0.7))
