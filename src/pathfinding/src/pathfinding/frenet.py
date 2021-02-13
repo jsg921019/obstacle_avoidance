@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import numpy as np
+import math
 
 class FrenetPath(object):
 
@@ -44,8 +45,6 @@ class Frenet(object):
         self.MAX_SF = 20.0
         self.DS = 4.0
         self.steps = 20
-
-        self.K_MAX = 5.0
 
         self.LANE_WIDTH = 3.0
 
@@ -135,31 +134,34 @@ class Frenet(object):
             fp.s_arr = np.linspace(fp.si, fp.si + self.MAX_SF, self.steps)
             fp.d_arr = np.where(fp.s_arr < fp.sf, fp.p(fp.s_arr), fp.target_d)
 
-            # cost for consistency
-            d_diff = (self.prev_opt_path.target_d - fp.target_d)**2
-
-            # cost
-            fp.c = self.K_D * d_diff
-
             for _s, _d in zip(fp.s_arr, fp.d_arr):
                 _x, _y, _ = self.get_cartesian(_s, _d)
                 fp.x.append(_x)
                 fp.y.append(_y)
+            fp.x = np.array(fp.x)
+            fp.y = np.array(fp.y)
 
-            for i in range(len(fp.x) - 1):
-                dx = fp.x[i + 1] - fp.x[i]
-                dy = fp.y[i + 1] - fp.y[i]
-                fp.yaw.append(np.arctan2(dy, dx))
-                fp.ds.append(np.hypot(dx, dy))
+            dx = fp.x[1:] - fp.x[:-1]
+            dy = fp.y[1:] - fp.y[:-1]
+            fp.yaw = np.arctan2(dy, dx)
+            fp.ds = np.hypot(dx, dy)
+            fp.yaw = np.append(fp.yaw, fp.yaw[-1])
+            fp.ds = np.append(fp.ds, fp.ds[-1])
 
-            fp.yaw.append(fp.yaw[-1])
-            fp.ds.append(fp.ds[-1])
+            # cost for consistency
+            d_diff = (self.prev_opt_path.target_d - fp.target_d)**2
 
-            # # calc curvature
-            # for i in range(len(fp.yaw) - 1):
-            #     yaw_diff = fp.yaw[i + 1] - fp.yaw[i]
-            #     yaw_diff = np.arctan2(np.sin(yaw_diff), np.cos(yaw_diff))
-            #     fp.kappa.append(yaw_diff / fp.ds[i])
+            # cost for path length
+            path_sum = np.sum(fp.ds)
+
+            # cost for curvature
+            yaw_diff = fp.yaw[1:] - fp.yaw[:-1]
+            yaw_diff = np.arctan2(np.sin(yaw_diff), np.cos(yaw_diff))
+            yaw_diff = np.abs(yaw_diff)
+            mean_kappa = np.sum(yaw_diff / fp.ds[:-1])
+            
+            # cost
+            fp.c = self.K_D * d_diff + path_sum + 500*mean_kappa
 
         return fplist
 

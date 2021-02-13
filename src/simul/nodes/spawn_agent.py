@@ -18,7 +18,7 @@ rospy.init_node("car")
 ######## Constants ########
 
 car_id = rospy.get_param("~id")
-start_ind = 100
+start_ind = 30
 target_speed = 20.0 / 3.6
 obstacles = [[45.4, 31.7], [25.578, -9.773], [22.578, -8.273]]
 
@@ -75,7 +75,7 @@ while not rospy.is_shutdown():
         di = lateral_controller.feedback(car.x, car.y, car.yaw, car.v, ref_path["x"], ref_path["y"], ref_path["yaw"])
     car.update(ai, di)
     ma.append(text2marker.convert("speed : %.2f" %car.v, 5))
-    
+
     # publish car / paths / ui for visualization
     car.publish_marker()
     car.publish_odom()
