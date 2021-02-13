@@ -1,3 +1,4 @@
 ## [1기 정승균] TAXI 과제
 
-실행 명령어 : `roslaunch simul test.launch`
+PID + Stanley + Frenet 시뮬레이션 : `$ roslaunch simul stanleysimul.launch`
+PID + Pure Pursuit + Frenet 시뮬레이션 : `$ roslaunch simul ppsimul.launch`

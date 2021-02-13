@@ -1,0 +1,7 @@
+<launch>
+    <node name="map" pkg= "map_server" type="map_visualizer.py" />
+    <node name="rviz" pkg= "rviz" type="rviz" args="-d $(find simul)/rviz/stanleysimul.rviz" required="true" />
+    <node name="autonomous_car" pkg= "simul" type="stanleysimul.py" output="screen" />
+    <node name="parked_cars" pkg= "simul" type="parking_car.py" output="screen"/>
+    <node name="collision_check" pkg= "obstacles" type="collision_check_with_visualizing_car.py" />
+</launch>

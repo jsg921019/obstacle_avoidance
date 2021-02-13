@@ -11,9 +11,9 @@ class PID_Controller(object):
     def feedback(self, error, dt):
         if self.prev_error is None:
             self.prev_error = error
-        diff_error = error - self.prev_error
+        diff_error = (error - self.prev_error) /dt
         self.prev_error = error
-        self.int_error += error
+        self.int_error += error*dt
         return -(self.Kp * error + self.Kd * diff_error/dt + self.Ki * self.int_error)
 
 if __name__ == "__main__":

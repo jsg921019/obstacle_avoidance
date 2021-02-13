@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Cars1/Namespaces1
         - /Path History1/Shape1
+        - /LookAhead1
       Splitter Ratio: 0.5
     Tree Height: 650
   - Class: rviz/Selection
@@ -133,6 +134,14 @@ Visualization Manager:
         ui: true
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /arrow
+      Name: LookAhead
+      Namespaces:
+        lookahead: true
+      Queue Size: 1
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -158,17 +167,17 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 137.548828
+      Distance: 144.676895
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 9.04358292
-        Y: 10.2623787
-        Z: -7.09349728
-      Focal Shape Fixed Size: true
+        X: 1.46873832
+        Y: 4.70363712
+        Z: 1.58033204
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
@@ -176,7 +185,7 @@ Visualization Manager:
       Pitch: 1.56979632
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.19324064
+      Yaw: 5.78361702
     Saved: ~
 Window Geometry:
   Displays:

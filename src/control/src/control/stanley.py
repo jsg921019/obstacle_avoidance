@@ -4,7 +4,7 @@
 import numpy as np
 
 class Stanley(object):
-    def __init__(self, k, ks=0.0, kd=0.0, L=2.875):
+    def __init__(self, k, ks=0.0, kd=0.0, L=2.8):
         self.k = k
         self.ks = ks
         self.kd = kd

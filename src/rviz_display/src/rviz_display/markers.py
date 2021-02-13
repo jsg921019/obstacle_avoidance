@@ -51,7 +51,7 @@ class PointDrawer:
 
     def draw(self, x , y, z=0):
         marker = Marker(
-                    ns = "obstacles",
+                    ns = "lookahead",
                     type=Marker.SPHERE,
                     id=1,
                     lifetime = rospy.Duration(1.5),
@@ -59,8 +59,8 @@ class PointDrawer:
                     scale=Vector3(1, 1, 1),
                     header=Header(frame_id=self.frame_id),
                     color=ColorRGBA(0.0, 1.0, 0.0, 0.8))
-        #self.pub.publish(marker)
-        return marker
+        self.pub.publish(marker)
+        #return marker
 
 class ArrowDrawer:
     def __init__(self,  frame_id="/map"):
@@ -69,14 +69,14 @@ class ArrowDrawer:
 
     def draw(self, x1 , y1, z1, x2, y2, z2):
         marker = Marker(
-                    ns = "orientation",
+                    ns = "lookahead",
                     id = 1,
                     type = Marker.ARROW,
                     lifetime = rospy.Duration(1.5),
                     points = [Point(x1, y1, z1), Point(x2, y2, z2)],
-                    scale = Vector3(0.1, 0.5, 0.3),
+                    scale = Vector3(0.3, 1, 0.5),
                     header=Header(frame_id=self.frame_id),
-                    color=ColorRGBA(0.0, 1.0, 0.0, 0.8))
+                    color=ColorRGBA(1.0, 1.0, 0.0, 0.8))
         self.pub.publish(marker)
 
 class TextMarker:
