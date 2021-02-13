@@ -15,12 +15,6 @@ from rviz_display.markers import PathMarker, PathsMarkerArray, TextMarker
 
 rospy.init_node("car")
 
-######## Obstacles ########
-
-obstacles = [[-30.458553086311177, 14.414126077364653, -0.53125179508589049], [-3.0498906544701483, 2.544585769133195, -0.28522847787702166], [16.517578547291212, 21.377199222248414, 1.0650195975940742], [37.964664882119735, 36.035169960021058, -0.37898259996841843], [61.461619252942874, 18.741150237288814, -1.2338908994573341], [52.224132065398798, -8.4852862022935458, -2.0868517894874943], [26.550675034402591, -10.530933162455529, 2.6357276099486535], [-0.80380752675549849, -4.477030648168701, -2.7048020772870105], [-18.959061589166485, -27.32287936690695, -2.0781794125158246]]
-obstacles = [[x + 1.4*np.cos(yaw), y + 1.4*np.sin(yaw)] for x, y, yaw in obstacles] + [[x - 1.4*np.cos(yaw), y - 1.4*np.sin(yaw)] for x, y, yaw in obstacles]
-
-
 ######## load reference path ########
 
 rospack = rospkg.RosPack()
@@ -28,6 +22,19 @@ path = rospack.get_path("map_server")
 
 with open(path + "/src/ref_path.pkl", "rb") as f:
     ref_path = pickle.load(f)
+
+
+
+######## load obstacles info ########
+
+path = rospack.get_path("obstacles")
+
+with open(path + "/src/obstacles.pkl", "rb") as f:
+    obstacles = pickle.load(f)
+xy, yaw = np.hsplit(obstacles, [2])
+yaw = np.column_stack([np.cos(yaw), np.sin(yaw)])
+obstacles = np.vstack([xy -1.4*yaw, xy +1.4*yaw])
+
 
 
 ######## Target ########
