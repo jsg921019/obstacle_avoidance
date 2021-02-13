@@ -17,11 +17,10 @@ rospy.init_node("car")
 
 ######## Constants ########
 
-car_id = rospy.get_param("~id")
 start_ind = 30
 target_speed = 20.0 / 3.6
-obstacles = [[45.4, 31.7], [25.578, -9.773], [22.578, -8.273]]
-
+obstacles = [[-30.458553086311177, 14.414126077364653, -0.53125179508589049], [-3.0498906544701483, 2.544585769133195, -0.28522847787702166], [16.517578547291212, 21.377199222248414, 1.0650195975940742], [37.964664882119735, 36.035169960021058, -0.37898259996841843], [61.461619252942874, 18.741150237288814, -1.2338908994573341], [52.224132065398798, -8.4852862022935458, -2.0868517894874943], [26.550675034402591, -10.530933162455529, 2.6357276099486535], [-0.80380752675549849, -4.477030648168701, -2.7048020772870105], [-18.959061589166485, -27.32287936690695, -2.0781794125158246]]
+obstacles = [[x + 1.4*np.cos(yaw), y + 1.4*np.sin(yaw)] for x, y, yaw in obstacles] + [[x - 1.4*np.cos(yaw), y - 1.4*np.sin(yaw)] for x, y, yaw in obstacles]
 
 
 ######## load reference path ########
@@ -40,22 +39,26 @@ path2marker = PathMarker()
 paths2markerarray = PathsMarkerArray()
 text2marker = TextMarker()
 paths_pub = rospy.Publisher("paths", MarkerArray, queue_size=1)
-#point_drawer = PointDrawer()
 
 
 
 ######## Instances ########
 
 car = KinematicBicycle(x=ref_path["x"][start_ind], y=ref_path["y"][start_ind], yaw=ref_path["yaw"][start_ind], v=0.1)
-car.init_marker_pub(topic="car1", frame_id="map", ns="driving", id=car_id)
+car.init_marker_pub(topic="driving", frame_id="map", ns="driving", id=1)
 car.init_odom_pub(name="odom", child_frame_id="car1", frame_id="map")
 
 longitudinal_controller = PID_Controller(0.5, 0, 0.00001)
 lateral_controller = Stanley(0.8, 0.5, 0, 2.875)
 
 path_finder = Frenet(ref_path, ref_path["x"][start_ind], ref_path["y"][start_ind], ref_path["yaw"][start_ind])
-
-
+# obstacles2 = []
+# i = -1
+# for s in range(50, 300, 30):
+#     xx, yy, yaww = path_finder.get_cartesian(s, i*1.2)
+#     obstacles2.append([xx, yy, yaww])
+#     i *= -1
+# print(obstacles2)
 
 ######## Main ########
 rate = rospy.Rate(10)

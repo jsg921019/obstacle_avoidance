@@ -10,13 +10,12 @@ from std_msgs.msg import ColorRGBA
 from separation_axis_theorem import separating_axis_theorem, get_vertice_rect
 
 class collision_check_marker():
-    def __init__(self, num_objects = None):
+    def __init__(self):
         self.object_data = {}
         self.marker_msg = {}
-        self.num_objects = num_objects
         self.markerarray_pub = rospy.Publisher("cars", MarkerArray, queue_size=1)
-        for i in range(self.num_objects):
-            rospy.Subscriber("car" + str(i+1), Marker, self.callback)
+        rospy.Subscriber("driving", Marker, self.callback)
+        rospy.Subscriber("parking", MarkerArray, self.callback_parking)
 
     def callback(self, msg):
         id = str(msg.id)
@@ -25,25 +24,30 @@ class collision_check_marker():
         self.object_data[id] = (msg.pose.position.x, msg.pose.position.y, yaw, msg.scale.x, msg.scale.y)
         self.marker_msg[id] = msg
 
+    def callback_parking(self, msgs):
+        for msg in msgs.markers:
+            self.callback(msg)
+
     def collision_check_and_publish(self):
-        if len(self.object_data) >= 2:
-            for id1, id2 in itertools.combinations(self.object_data, 2):
-                first_object_vertices = get_vertice_rect(self.object_data[id1])
-                second_object_vertices = get_vertice_rect(self.object_data[id2])
-                is_collide = separating_axis_theorem(first_object_vertices, second_object_vertices)
-                if is_collide:
-                    self.marker_msg[id1].color = ColorRGBA(192/255.0, 57/255.0,43/255.0, 0.97)
-                    self.marker_msg[id2].color = ColorRGBA(192/255.0, 57/255.0,43/255.0, 0.97)
+        if len(self.object_data) >= 2 and "1" in self.object_data:
+            driving_object_vertices = get_vertice_rect(self.object_data["1"])
+            for id in self.object_data:
+                if id != "1":
+                    parking_object_vertices = get_vertice_rect(self.object_data[id])
+                    if separating_axis_theorem(driving_object_vertices, parking_object_vertices):
+                        self.marker_msg["1"].color = ColorRGBA(192/255.0, 57/255.0,43/255.0, 0.97)
+                        self.marker_msg[id].color = ColorRGBA(192/255.0, 57/255.0,43/255.0, 0.97)
+                        break
 
         self.markerarray_pub.publish(MarkerArray(self.marker_msg.values()))
 
 
 if __name__ == "__main__":
-    rospy.init_node("collision_checking_marker_node")
-    num_objects = 3
-    collision_check = collision_check_marker(num_objects)
 
+    rospy.init_node("collision_checking_marker_node")
     r = rospy.Rate(30)
+
+    collision_check = collision_check_marker()
     while not rospy.is_shutdown():
         collision_check.collision_check_and_publish()
         r.sleep()

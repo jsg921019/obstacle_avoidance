@@ -2,6 +2,7 @@
 
 import rospy
 import numpy as np
+import tf
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
 from std_msgs.msg import Header, ColorRGBA
@@ -93,3 +94,23 @@ class TextMarker:
             header=Header(frame_id="map"),
             color=ColorRGBA(*color))
         return marker
+
+class CubeMarker:
+    def __init__(self, frame_id="map", ns="parked", scale=(4.7, 1.9, 1.4), color=(93/255.0, 122/255.0, 177/255.0, 0.97)):
+        self.frame_id = frame_id
+        self.ns = ns
+        self.scale = Vector3(*scale)
+        self.color = ColorRGBA(*color)
+
+    def convert(self, x, y, z, yaw, id):
+        m = Marker()
+        m.header.frame_id = self.frame_id
+        m.header.stamp = rospy.Time.now()
+        m.ns = self.ns
+        m.id = id
+        m.type = m.CUBE
+        quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
+        m.pose = Pose(Point(x, y, z), Quaternion(*quat))
+        m.scale = self.scale
+        m.color = self.color
+        return m
