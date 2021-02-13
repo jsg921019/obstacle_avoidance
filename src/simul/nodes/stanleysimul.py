@@ -45,25 +45,28 @@ target_x, target_y = ref_path["x"][430], ref_path["y"][430]
 
 
 
-######## Publishers ########
+######## Instances ########
 
+# Marker Converter
 path2marker = PathMarker()
 paths2markerarray = PathsMarkerArray()
 text2marker = TextMarker()
-paths_pub = rospy.Publisher("paths", MarkerArray, queue_size=1)
 
-
-
-######## Instances ########
-
+# driving car instance
 car = KinematicBicycle(start_x, start_y, start_yaw)
+
+# publishers
 car.init_marker_pub(topic="driving", frame_id="map", ns="driving", id=1)
 car.init_odom_pub(name="odom", child_frame_id="car1", frame_id="map")
+paths_pub = rospy.Publisher("paths", MarkerArray, queue_size=1)
 
-longitudinal_controller = PID_Controller(0.5, 0, 0.00001)
-lateral_controller = Stanley(0.8, 0.5, 0, 2.875)
+# controller instance
+longitudinal_controller = PID_Controller(Kp=0.5, Kd=0, Ki=0.0003)
+lateral_controller = Stanley(k=0.8, ks=0.5, kd=0, L=2.8)
 
+# path finding instance
 path_finder = Frenet(ref_path, start_x, start_y, start_yaw)
+
 
 
 ######## Main ########
@@ -73,8 +76,9 @@ while not rospy.is_shutdown():
 
     # find optimal path from Frenet
     paths, optimal_path = path_finder.find_path(car.x + car.L * np.cos(car.yaw), car.y + car.L * np.sin(car.yaw), obstacles)
-    ma = paths2markerarray.convert(paths)
+    ma = []
     if optimal_path:
+        ma = paths2markerarray.convert(paths)
         ma.append(path2marker.convert(optimal_path))
     
     # update car
@@ -87,7 +91,7 @@ while not rospy.is_shutdown():
     ma.append(text2marker.convert("speed : %.2f" %car.v, 5))
 
     # check if near target
-    if np.hypot(car.x - target_x, car.y - target_y) < 2 :  
+    if np.hypot(car.x - target_x, car.y - target_y) < 2.5:  
             car.x, car.y, car.yaw, car.v, car.a = start_x, start_y, start_yaw, 0, 0
             path_finder.reset(start_x, start_y, start_yaw)
 

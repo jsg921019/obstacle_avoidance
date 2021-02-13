@@ -72,8 +72,9 @@ while not rospy.is_shutdown():
 
     # find optimal path from Frenet
     paths, optimal_path = path_finder.find_path(car.x, car.y, obstacles)
-    ma = paths2markerarray.convert(paths)
+    ma = []
     if optimal_path:
+        ma = paths2markerarray.convert(paths)
         ma.append(path2marker.convert(optimal_path))
     
     # update car
