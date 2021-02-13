@@ -40,12 +40,12 @@ class Vehicle(object):
         self.m.id = id
         self.m.type = Marker.CUBE
         self.m.scale = Vector3(self.specs["LENGTH"], self.specs["WIDTH"], self.specs["HEIGHT"])
-        self.m.color = ColorRGBA(93/255.0, 122/255.0, 177/255.0, 0.97)
+        self.m.color = ColorRGBA(120/255.0, 60/255.0, 0/255.0, 0.97)
 
     def publish_marker(self):
         quat = tf.transformations.quaternion_from_euler(0, 0, self.yaw)
         self.m.header.stamp = rospy.Time.now()
-        self.m.pose = Pose(Point(self.x + self.L * math.cos(self.yaw), self.y + self.L * math.sin(self.yaw), self.specs["HEIGHT"]/2.0), Quaternion(*quat))
+        self.m.pose = Pose(Point(self.x + self.L/2.0 * math.cos(self.yaw), self.y + self.L/2.0 * math.sin(self.yaw), self.specs["HEIGHT"]/2.0), Quaternion(*quat))
         self.marker_pub.publish(self.m)
 
 class KinematicBicycle(Vehicle):

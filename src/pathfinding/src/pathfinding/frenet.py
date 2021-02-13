@@ -192,3 +192,8 @@ class Frenet(object):
                 return True
 
         return False
+
+    def reset(self, x, y, yaw):
+        self.max_idx, self.min_idx = len(self.refx)-1, 0
+        s, d, yaw_road = self.get_frenet(x, y)
+        self.prev_opt_path = FrenetPath(s, d, np.tan(yaw-yaw_road), 0, s+1, 0, 0, 0)
