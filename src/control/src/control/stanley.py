@@ -20,7 +20,7 @@ class Stanley(object):
 
         return angle
 
-    def feedback(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
+    def feedback(self, x, y, yaw, v, map_xs, map_ys, map_yaws, dt=0.1):
         # find nearest point
         min_dist = 1e9
         min_index = 0
@@ -53,7 +53,7 @@ class Stanley(object):
         cte_term = np.arctan2(self.k*cte, v + self.ks)
 
         # steering
-        steer = yaw_term + cte_term + self.kd* (yaw_term-self.prev_yaw_term)
+        steer = yaw_term + cte_term + self.kd* (yaw_term-self.prev_yaw_term)/dt
         self.prev_yaw_term = yaw_term
         return steer
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     # paramters
     dt = 0.1
-    k = 0.5  # control gain
+    k = 1  # control gain
 
     # GV70 PARAMETERS
     LENGTH = 4.715
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # vehicle
     model = KinematicBicycle(x=0.0, y=0.0, yaw=np.deg2rad(45), v=2.0)
-    stanley = Stanley(k,0,20)
+    stanley = Stanley(k,0,2)
 
     xs = []
     ys = []
@@ -99,9 +99,9 @@ if __name__ == "__main__":
         t = step * dt
 
         steer = stanley.feedback(model.x, model.y, model.yaw, model.v, map_xs, map_ys, map_yaws)
-        steer = np.clip(steer, -model.max_steering, model.max_steering)
+        steer = np.clip(steer, -model.LIM_DELTA, model.LIM_DELTA)
 
-        model.update(steer, 0, dt)
+        model.update(0, steer, dt)
 
         xs.append(model.x)
         ys.append(model.y)
@@ -178,5 +178,5 @@ if __name__ == "__main__":
     plt.ylabel("Y [m]")
     plt.legend(loc="best")
     plt.tight_layout()
-    plt.savefig("stanley_method.png", dpi=300)
+    #plt.savefig("stanley_method.png", dpi=300)
     plt.show()

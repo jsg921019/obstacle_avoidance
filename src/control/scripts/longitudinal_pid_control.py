@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from control.pid import PID_Controller
 
-dt = 0.01
-v = 0.1
+dt = 0.1
+v = 0
 target_speed = 20.0 / 3.6
 # min_error = 1
 # for Kp in np.logspace(-2, 2, 20):
@@ -32,27 +32,31 @@ target_speed = 20.0 / 3.6
 #                     min_error = err
 
 
-Kp, Kd, Ki = 3.3598182862837809, 0.01, 1.0000000000000001e-05
+Kp, Kd, Ki = 10, 0, 0.003
 
 pid = PID_Controller(Kp, Kd, Ki)
+tsl = []
 tl = []
 vl = []
 el = []
-for i in range(1000):
+for i in range(100):
+    ts = min(0.1*i, target_speed)
     t = i * dt
-    error = v - target_speed
+    error = v - ts
     a = pid.feedback(error, dt)
     v = v + a * dt
+    tsl.append(ts)
     tl.append(t)
     vl.append(v)
     el.append(abs(error))
 print(np.mean(el))
+
 plt.figure()
-plt.plot([0, tl[-1]], [target_speed, target_speed], 'r-', label="reference")
+plt.plot(tl, tsl, 'r-', label="target speed")
 plt.plot(tl, vl, 'b-', label="PID controller")
-plt.xlabel('v (m/s)')
-plt.ylabel('t (s)')
-plt.legend(loc="best")
-plt.axis("equal")
+plt.title('PID Control for speed')
+plt.xlabel('t (sec)')
+plt.ylabel('v (m/s)')
+plt.legend(loc="lower right")
 
 plt.show()
