@@ -2,7 +2,7 @@ build/
 devel/
 .vscode/
 src/testpkg/
-
+src/qrcode/
 *.*.save
 
 # QtCreator files
